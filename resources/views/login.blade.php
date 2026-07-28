@@ -1,8 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Ini Halaman Ujicoba')
+@section('title', 'Login')
 
 @section('content')
+
+      @section('favicon')
+        <link rel="icon" type="image/png" href="{{ asset('mebius.png') }}">
+      @endsection
 
 <div class="card text-center position-absolute top-50 start-50 translate-middle" style="width: 18rem;">
   <div class="card-header">
