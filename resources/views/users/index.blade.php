@@ -8,6 +8,20 @@
 
 <h1>Halaman Users</h1>
 <a href="{{ route('admin.users.create') }}" class="btn btn-primary">Create</a>
+<form action="{{ route('admin.users') }}" method="GET" class="mb-3">
+    <div class="input-group">
+        <input 
+            type="text" 
+            name="search" 
+            value="{{ request('search') }}" 
+            class="form-control" 
+            placeholder="Search username or email" 
+        >
+        <button class="btn btn-outline-secondary" type="submit">
+            Search
+        </button>
+    </div>
+</form>
 <table class="table">
   <thead>
     <tr>
@@ -27,11 +41,11 @@
         <td>{{ $user->email }}</td>
         <td>{{ $user->role->name }}</td>
         <td>
-            <a href="" class="btn btn-sm btn-warning">
-                Edit Akun
+            <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-sm btn-warning">
+                Edit Akun 
             </a>
             ||
-            <form action="" method="" class="d-inline">
+            <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="d-inline">
                 @csrf
                 @method('DELETE')
                 <button class="btn btn-sm btn-danger" onclick="return confirm('Yakin hapus user ini?')">

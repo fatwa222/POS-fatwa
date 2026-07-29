@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Produk;
+namespace App\Http\Requests\User;
 
-use App\Http\Requests\Produk\StoreRequest;
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class StoreRequest extends FormRequest
+class UpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,12 +23,15 @@ class StoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-        'name' => 'required|string|max:100',
-        'email' => 'required|email|unique:users,email',
-        'password' => 'required|min:8',
-        'role_id' => 'required|exists:roles,id'
-
-
+            'name' => 'required|string|max:100',
+        'email' => [
+            'required',
+            'email',
+            Rule::unique('users')->ignore($this->user->id),
+        ],
+        'password' => 'nullable|min:8',
+        'role_id'  => 'required',
+        'is_active' => 'boolean'
         ];
     }
 
@@ -40,12 +42,10 @@ public function messages(): array
         'name.max'          => 'Maksimal panjang nama 100 karakter.',
         'email.required'    => 'Email wajib diisi.',
         'email.email'       => 'Format email tidak valid.',
-        'password.required' => 'Password wajib diisi.',
         'password.min'      => 'Password minimal :min karakter.',
-        'role_id.required'  => 'Roles Wajib diisi.',
+        'role.required'     => 'Role wajib diisi.'
     ];
 }
-
 
 
 }
