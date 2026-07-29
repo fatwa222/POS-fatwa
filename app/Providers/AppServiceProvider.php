@@ -2,13 +2,22 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider AS ServiceProvider;
+use Illuminate\Pagination\Paginator;
+use Carbon\Carbon;
+use App\Models\User;
+use App\Policies\DashboardPolicy;
 
 class AppServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
      */
+    protected $policies = [
+        User::class => DashboardPolicy::class
+    ];
+
+
     public function register(): void
     {
         //
@@ -19,6 +28,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Paginator::useBootstrapFive();
+        Carbon::setlocale('id');
+        $this->registerPolicies();
     }
 }
