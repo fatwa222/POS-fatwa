@@ -27,6 +27,17 @@ class Penjualan extends Model
 
     public function itemPenjualan()
     {
-        return $this->hasMany(ItemPenjualan::class, 'penjualan_id');
+        return $this->hasMany(ItemPenjualan::class);
     }
+
+    public function produk()
+{
+    return $this->belongsTo(Produk::class);
+}
+
+public function penjualan()
+{
+    return $this->belongsTo(Penjualan::class);
+}
+
 }
