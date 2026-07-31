@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\Penjualan;
 use App\Http\Requests\SearchRequest;
@@ -79,42 +80,48 @@ public function index(SearchRequest $request)
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        $request->validate([
-        'metode_pembayaran' => 'required|in:CASH,QRIS,TRANSFER',
-    ]);
-
+   public function edit(string $id)
+{
     $sale = Penjualan::findOrFail($id);
 
-    if ($sale->itemPenjualan()->count() === 0) {
-        return back()->with('error', 'Keranjang masih kosong, tidak bisa checkout.');
+    // Pastikan cuma transaksi OPEN yang boleh diedit
+    if ($sale->status !== 'OPEN') {
+        return redirect()->route('penjualan.index')
+            ->with('errors', 'Transaksi ini sudah selesai, tidak bisa diedit.');
     }
 
-    $sale->update([
-        'metode_pembayaran' => $request->metode_pembayaran,
-        'status' => 'COMPLETED',
-    ]);
-    return redirect()->route('penjualan.index')->with('success', 'Transaksi berhasil, pembayaran diterima.');
-    }
+    $produk = Produk::latest()->get();
+
+    // Arahkan balik ke halaman pos (kasir) untuk lanjutin transaksi
+    return view('penjualan.pos', compact('sale', 'produk'));
+}
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
-    {
-        $sale = Penjualan::findOrFail($id);
-    $sale->itemPenjualan()->delete(); // hapus semua item keranjangnya dulu
-    $sale->delete();                  // baru hapus transaksinya
-
-    return redirect()->route('penjualan.index')->with('success', 'Transaksi dibatalkan.');
+   public function destroy(Penjualan $penjualan)
+{
+    // ❗ Pastikan hanya transaksi OPEN
+    if ($penjualan->status !== 'OPEN') {
+        return redirect()->route('penjualan.index')->with('errors', 'Transaksi sudah selesai tidak bisa dibatalkan');
     }
+
+    DB::transaction(function () use ($penjualan) {
+
+        foreach ($penjualan->itemPenjualan as $item) {
+            // ⏫ kembalikan stok
+            $item->produk->increment('stok', $item->kuantitas);
+        }
+
+        // ❌ hapus item
+        $penjualan->itemPenjualan()->delete();
+
+        // ❌ hapus penjualan
+        $penjualan->delete();
+    });
+
+    return redirect()
+        ->route('penjualan.index')
+        ->with('success', 'Transaksi berhasil dibatalkan');
+}
 }
