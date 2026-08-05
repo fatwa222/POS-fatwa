@@ -19,7 +19,7 @@
                        onkeyup="this.form.submit()">
             </form>
 
-            @foreach($produk as $item)
+            @foreach($products as $item)
 <div class="d-flex justify-content-between align-items-center border rounded p-2 mb-2">
     <div>
         <div class="fw-semibold text-primary">{{ $item->nama }}</div>
@@ -70,12 +70,14 @@
             </td>
             <td>Rp.{{ number_format($item->subtotal) }}</td>
             <td>
+                @can('delete', $item)
                 <form method="POST" action="{{ route('item-penjualan.destroy', $item->id) }}"
                       onsubmit="return confirm('Hapus barang ini dari keranjang?')">
                     @csrf
                     @method('DELETE')
                     <button class="btn btn-sm btn-danger">Hapus</button>
                 </form>
+                @endcan
             </td>
         </tr>
         @empty
@@ -105,7 +107,7 @@
         Checkout
     </button>
 </form>
-
+ 
 <form method="POST" action="{{ route('penjualan.destroy', $sale->id) }}"
       onsubmit="return confirm('Yakin batalkan transaksi ini? Semua item di keranjang akan dihapus.')" class="mt-2">
     @csrf

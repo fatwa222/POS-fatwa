@@ -50,13 +50,13 @@ public function index(SearchRequest $request)
 
     $search = $request->search;
 
-    $produk = Produk::when($search, function ($query, $search) {
+    $products = Produk::when($search, function ($query, $search) {
             $query->where('nama', 'like', "%{$search}%");
         })
         ->latest()
         ->get();
 
-    return view('penjualan.pos', compact('sale', 'produk'));
+    return view('penjualan.pos', compact('sale', 'products'));
 }
     
     /**
@@ -80,20 +80,17 @@ public function index(SearchRequest $request)
     /**
      * Show the form for editing the specified resource.
      */
-   public function edit(string $id)
+  public function edit(Penjualan $penjualan)
 {
-    $sale = Penjualan::findOrFail($id);
+    $sale = $penjualan;
 
-    // Pastikan cuma transaksi OPEN yang boleh diedit
-    if ($sale->status !== 'OPEN') {
-        return redirect()->route('penjualan.index')
-            ->with('errors', 'Transaksi ini sudah selesai, tidak bisa diedit.');
-    }
+    abort_if($sale->status === 'COMPLETED', 403);
 
-    $produk = Produk::latest()->get();
+    $sale->load('itemPenjualan');
+    $products = Produk::orderBy('nama')->get();
+    $mode = 'edit';
 
-    // Arahkan balik ke halaman pos (kasir) untuk lanjutin transaksi
-    return view('penjualan.pos', compact('sale', 'produk'));
+    return view('penjualan.pos', compact('sale', 'products', 'mode'));
 }
 
     /**
@@ -101,6 +98,7 @@ public function index(SearchRequest $request)
      */
    public function destroy(Penjualan $penjualan)
 {
+        $this->authorize('delete', $penjualan);
     // ❗ Pastikan hanya transaksi OPEN
     if ($penjualan->status !== 'OPEN') {
         return redirect()->route('penjualan.index')->with('errors', 'Transaksi sudah selesai tidak bisa dibatalkan');
@@ -124,4 +122,23 @@ public function index(SearchRequest $request)
         ->route('penjualan.index')
         ->with('success', 'Transaksi berhasil dibatalkan');
 }
+
+public function update(Request $request, Penjualan $penjualan)
+{
+    // Validasi input
+    $request->validate([
+        'metode_pembayaran' => 'required|string',
+    ]);
+
+    // Update data penjualan
+    $penjualan->update([
+        'metode_pembayaran' => $request->metode_pembayaran,
+        'status' => 'COMPLETED', // Sesuaikan logika status jika perlu
+    ]);
+
+    return redirect()->route('penjualan.index')->with('success', 'Transaksi berhasil diperbarui!');
+}
+
+
+
 }

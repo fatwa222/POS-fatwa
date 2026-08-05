@@ -105,6 +105,8 @@ class ItemPenjualanController extends Controller
      */
     public function destroy(string $id)
     {
+        $this->authorize('delete', Itempenjualan);
+
         $item = ItemPenjualan::findOrFail($id);
     $penjualanId = $item->penjualan_id;
     $item->delete();

@@ -47,10 +47,13 @@
         <td>{{ $sale->status }}</td>
         <td class="d-flex gap-1">
             <a href="{{ route('penjualan.show', $sale->id) }}" class="btn btn-primary">Detail</a>
+            @can('view', $sale)
             ||
             @if($sale->status === 'OPEN')
-    <a href="{{ route('penjualan.edit', $sale->id) }}" class="btn btn-warning">Edit</a>
+    <a href="{{ route('penjualan.edit', $sale) }}" class="btn btn-warning">Edit</a>
 @endif
+@endcan
+@can('delete', $sale)
             ||
             <form action="{{ route('penjualan.destroy', $sale) }}" method="POST" class="d-inline">
                 @csrf
@@ -59,6 +62,7 @@
                     Hapus
                 </button>
             </form>
+            @endcan
         </td>
     </tr>
     @empty
