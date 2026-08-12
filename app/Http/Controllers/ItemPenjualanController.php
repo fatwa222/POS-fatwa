@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\ItemPenjualan;
 use App\Models\Produk;
 use App\Models\Penjualan; 
+use Illuminate\Support\Facades\DB;
 
 class ItemPenjualanController extends Controller
 {
@@ -28,41 +29,40 @@ class ItemPenjualanController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-        public function store(Request $request)
-{
-    $request->validate([
-        'penjualan_id' => 'required|exists:penjualan,id',
-        'produk_id' => 'required|exists:produk,id',
-        'kuantitas' => 'nullable|integer|min:1',
-    ]);
-
-    $jumlah = $request->kuantitas ?? 1;
-    $produk = Produk::findOrFail($request->produk_id);
-
-    $item = ItemPenjualan::where('penjualan_id', $request->penjualan_id)
-        ->where('produk_id', $request->produk_id)
-        ->first();
-
-    if ($item) {
-        $item->kuantitas += $jumlah;
-        $item->subtotal = $item->kuantitas * $item->harga_satuan;
-        $item->save();
-    } else {
-        $item = ItemPenjualan::create([
-            'penjualan_id' => $request->penjualan_id,
-            'produk_id' => $request->produk_id,
-            'kuantitas' => $jumlah,
-            'harga_satuan' => $produk->harga_jual,
-            'subtotal' => $jumlah * $produk->harga_jual,
+    public function store(Request $request)
+    {
+        $request->validate([
+            'penjualan_id' => 'required|exists:penjualan,id',
+            'produk_id'    => 'required|exists:produk,id',
+            'kuantitas'    => 'nullable|integer|min:1',
         ]);
+
+        $jumlah = $request->kuantitas ?? 1;
+        $produk = Produk::findOrFail($request->produk_id);
+
+        $item = ItemPenjualan::where('penjualan_id', $request->penjualan_id)
+            ->where('produk_id', $request->produk_id)
+            ->first();
+
+        if ($item) {
+            $item->kuantitas += $jumlah;
+            $item->subtotal = $item->kuantitas * $item->harga_satuan;
+            $item->save();
+        } else {
+            $item = ItemPenjualan::create([
+                'penjualan_id' => $request->penjualan_id,
+                'produk_id'    => $request->produk_id,
+                'kuantitas'    => $jumlah,
+                'harga_satuan' => $produk->harga_jual,
+                'subtotal'     => $jumlah * $produk->harga_jual,
+            ]);
+        }
+
+        $total = ItemPenjualan::where('penjualan_id', $request->penjualan_id)->sum('subtotal');
+        Penjualan::where('id', $request->penjualan_id)->update(['total_pembayaran' => $total]);
+
+        return back();
     }
-
-    $total = ItemPenjualan::where('penjualan_id', $request->penjualan_id)->sum('subtotal');
-    Penjualan::where('id', $request->penjualan_id)->update(['total_pembayaran' => $total]);
-
-    return back();
-}
-
 
     /**
      * Display the specified resource.
@@ -86,18 +86,18 @@ class ItemPenjualanController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-        'kuantitas' => 'required|integer|min:1',
-    ]);
+            'kuantitas' => 'required|integer|min:1',
+        ]);
 
-    $item = ItemPenjualan::findOrFail($id);
-    $item->kuantitas = $request->kuantitas;
-    $item->subtotal = $item->kuantitas * $item->harga_satuan;
-    $item->save();
+        $item = ItemPenjualan::findOrFail($id);
+        $item->kuantitas = $request->kuantitas;
+        $item->subtotal = $item->kuantitas * $item->harga_satuan;
+        $item->save();
 
-    $total = ItemPenjualan::where('penjualan_id', $item->penjualan_id)->sum('subtotal');
-    Penjualan::where('id', $item->penjualan_id)->update(['total_pembayaran' => $total]);
+        $total = ItemPenjualan::where('penjualan_id', $item->penjualan_id)->sum('subtotal');
+        Penjualan::where('id', $item->penjualan_id)->update(['total_pembayaran' => $total]);
 
-    return back();
+        return back();
     }
 
     /**
@@ -105,15 +105,31 @@ class ItemPenjualanController extends Controller
      */
     public function destroy(string $id)
     {
-        $this->authorize('delete', Itempenjualan);
+        // Ambil data berdasarkan ID agar aman dari mismatch Route Model Binding
+        $itempenjualan = ItemPenjualan::findOrFail($id);
 
-        $item = ItemPenjualan::findOrFail($id);
-    $penjualanId = $item->penjualan_id;
-    $item->delete();
+        $this->authorize('delete', $itempenjualan);
 
-    $total = ItemPenjualan::where('penjualan_id', $penjualanId)->sum('subtotal');
-    Penjualan::where('id', $penjualanId)->update(['total_pembayaran' => $total]);
+        DB::transaction(function () use ($itempenjualan) {
+            $produk = $itempenjualan->produk;
+            $sale   = $itempenjualan->penjualan;
 
-    return back();
+            // Kembalikan stok hanya jika produknya masih ada
+            if ($produk) {
+                $produk->increment('stok', $itempenjualan->kuantitas);
+            }
+
+            // Hapus item
+            $itempenjualan->delete();
+
+            // Update total penjualan jika relasinya ada
+            if ($sale) {
+                $sale->update([
+                    'total_pembayaran' => $sale->itemPenjualan()->sum('subtotal')
+                ]);
+            }
+        });
+
+        return back();
     }
 }

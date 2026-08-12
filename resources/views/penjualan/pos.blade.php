@@ -107,14 +107,14 @@
         Checkout
     </button>
 </form>
- 
+    @can('delete', $sale)
 <form method="POST" action="{{ route('penjualan.destroy', $sale->id) }}"
       onsubmit="return confirm('Yakin batalkan transaksi ini? Semua item di keranjang akan dihapus.')" class="mt-2">
     @csrf
     @method('DELETE')
     <button class="btn btn-outline-danger w-100">Batal Transaksi</button>
 </form>
-
+@endcan
 
         </div>
     </div>
