@@ -28,6 +28,7 @@ class UpdateRequest extends FormRequest
             'purchase_price' => 'required|integer|min:0',
             'selling_price' => 'required|integer|min:0',
             'stock' => 'required|integer|min:0',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ];
         
     }

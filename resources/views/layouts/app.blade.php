@@ -5,6 +5,7 @@
     <title>@yield('title')</title>
     <link rel="icon" type="image/png" href="{{ asset('mebius.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+     <script src="https://unpkg.com/feather-icons"></script>
   </head>
   <body>
     
@@ -22,5 +23,8 @@
 
             @yield('content')
         </div>
+        <script>
+      feather.replace();
+    </script>
   </body>
 </html>

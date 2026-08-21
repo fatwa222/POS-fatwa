@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\User;
+namespace App\Http\Requests\Produk;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -29,6 +29,7 @@ class StoreRequest extends FormRequest
     'purchase_price' => 'required|integer|min:0',
     'selling_price' => 'required|integer|min:0',
     'stock' => 'required|integer|min:0',
+    'avatar'   => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
 ];
     }
 

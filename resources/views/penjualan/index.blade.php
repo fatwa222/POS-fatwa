@@ -27,8 +27,9 @@
 <table class="table">
     <thead>
     <tr>
-        <th scope="col">#</th>
+        <th scope="col">No</th>
         <th scope="col">Tanggal Transaksi</th>
+        <th scope="col">Foto profile</th>
         <th scope="col">Kasir</th>
         <th scope="col">Total Pembayaran</th>
         <th scope="col">Metode Pembayaran</th>
@@ -41,6 +42,25 @@
     <tr>
         <th scope="row">{{ $sales->firstItem() + $loop->index }}</th>
         <td>{{ $sale->created_at->translatedFormat('d-m-Y H:i:s') }}</td>
+        <td> 
+        @if ($sale->user && $sale->user->avatar)
+            <img src="{{ asset('storage/' . $sale->user->avatar) }}" 
+                 alt="Avatar" 
+                 class="rounded-circle" 
+                 width="40" 
+                 height="40" 
+                 style="object-fit: cover;">
+        @else
+            <!-- Menggunakan nama kasir untuk avatar otomatis jika tidak ada foto -->
+            <img src="https://ui-avatars.com/api/?name={{ urlencode($sale->user->name ?? 'Kasir') }}&background=random" 
+                 alt="Avatar" 
+                 class="rounded-circle" 
+                 width="40" 
+                 height="40" 
+                 style="object-fit: cover;">
+        @endif
+    </td>
+        </td>
         <td>{{ $sale->user->name }}</td>
         <td>Rp. {{ number_format($sale->total_pembayaran) }}</td>
         <td>{{ $sale->metode_pembayaran }}</td>

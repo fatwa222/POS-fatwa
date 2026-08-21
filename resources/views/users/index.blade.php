@@ -25,7 +25,8 @@
 <table class="table">
   <thead>
     <tr>
-      <th scope="col">#</th>
+      <th scope="col">No</th>
+      <th scope="col">Foto Profil</th>
       <th scope="col">Name</th>
       <th scope="col">Email</th>
       <th scope="col">Role</th>
@@ -37,6 +38,23 @@
  @foreach($users as $user)
     <tr>
         <td>{{ $users->firstItem() + $loop->index }}</td>
+        <td>
+          <!-- Ubah $u menjadi $user di sini -->
+          @if ($user->avatar)
+            <img src="{{ asset('storage/' . $user->avatar) }}" 
+                 alt="Avatar" 
+                 class="rounded-circle" 
+                 width="40" 
+                 height="40" 
+                 style="object-fit: cover;">
+          @else
+            <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=random" 
+                 alt="Avatar" 
+                 class="rounded-circle" 
+                 width="40" 
+                 height="40">
+          @endif
+        </td>
         <td>{{ $user->name }}</td>
         <td>{{ $user->email }}</td>
         <td>{{ $user->role->name }}</td>
@@ -57,6 +75,5 @@
 @endforeach
   </tbody>
 </table>
-
 
 @endsection

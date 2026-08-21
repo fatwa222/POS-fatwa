@@ -1,15 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Produk')
+@section('title', 'Edit User')
 
 @section('content')
-<h4>Edit Produk</h4>
+<h4>Edit User</h4>
 
-<form action="{{ route('produk.update', $produk) }}"
-      method="POST"
-      enctype="multipart/form-data">
+<!-- Gunakan method="POST" dan HAPUS baris @method('PUT') -->
+<form action="{{ route('admin.users.update', $user) }}" method="POST" enctype="multipart/form-data"> 
     @csrf
-    @method('PUT')
-    @include('Produk._form')
+    @include('users._form')
 </form>
 @endsection

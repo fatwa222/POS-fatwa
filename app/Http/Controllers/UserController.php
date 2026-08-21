@@ -9,6 +9,7 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage; // Added Storage Facade
 
 class UserController extends Controller
 {
@@ -17,18 +18,17 @@ class UserController extends Controller
      */
     public function index(SearchRequest $request)
     {
-
         $keyword = $request->input('search');
 
-    if($keyword) {
-        $users = User::whereRaw("MATCH(name, email) AGAINST(? IN BOOLEAN MODE)", [$keyword])
-            ->paginate(10)
-            ->withQueryString();
-    } else {
-        $users = User::query()->paginate(10)->withQueryString();
-    }
+        if($keyword) {
+            $users = User::whereRaw("MATCH(name, email) AGAINST(? IN BOOLEAN MODE)", [$keyword])
+                ->paginate(10)
+                ->withQueryString();
+        } else {
+            $users = User::query()->paginate(10)->withQueryString();
+        }
 
-    return view('users.index', compact('users'));
+        return view('users.index', compact('users'));
     }
 
     /**
@@ -52,6 +52,11 @@ class UserController extends Controller
         $data['email']    = $dataReq['email'];
         $data['password'] = Hash::make($dataReq['password']);
         $data['role_id']  = $dataReq['role_id'];
+
+        // Cek jika ada foto yang di-upload
+        if ($request->hasFile('avatar')) {
+            $data['avatar'] = $request->file('avatar')->store('avatars', 'public');
+        }
 
         User::create($data);
 
@@ -89,6 +94,18 @@ class UserController extends Controller
         if (!empty($dataReq['password'])) {
             $user->password = Hash::make($dataReq['password']);
         }
+
+        // Cek jika user mengunggah foto profil baru
+        if ($request->hasFile('avatar')) {
+            // Hapus foto lama dari storage jika ada
+            if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+
+            // Simpan foto baru
+            $user->avatar = $request->file('avatar')->store('avatars', 'public');
+        }
+
         $user->save();
 
         return redirect()->route('admin.users.edit', $user->id)->with('success', 'User updated');
@@ -100,28 +117,30 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         \DB::transaction(function () use ($user) {
-        // Ambil ID produk & penjualan user
-        $produkIds = \DB::table('produk')->where('user_id', $user->id)->pluck('id');
-        $penjualanIds = \DB::table('penjualan')->where('user_id', $user->id)->pluck('id');
+            // Ambil ID produk & penjualan user
+            $produkIds = \DB::table('produk')->where('user_id', $user->id)->pluck('id');
+            $penjualanIds = \DB::table('penjualan')->where('user_id', $user->id)->pluck('id');
 
-        // 1. Hapus item_penjualan terkait
-        \DB::table('item_penjualan')
-            ->whereIn('produk_id', $produkIds)
-            ->orWhereIn('penjualan_id', $penjualanIds)
-            ->delete();
+            // 1. Hapus item_penjualan terkait
+            \DB::table('item_penjualan')
+                ->whereIn('produk_id', $produkIds)
+                ->orWhereIn('penjualan_id', $penjualanIds)
+                ->delete();
 
-        // 2. Hapus penjualan
-        \DB::table('penjualan')->where('user_id', $user->id)->delete();
+            // 2. Hapus penjualan
+            \DB::table('penjualan')->where('user_id', $user->id)->delete();
 
-        // 3. Hapus produk
-        \DB::table('produk')->where('user_id', $user->id)->delete();
+            // 3. Hapus produk
+            \DB::table('produk')->where('user_id', $user->id)->delete();
 
+            // 4. Hapus file foto dari storage jika ada
+            if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+                Storage::disk('public')->delete($user->avatar);
+            }
 
-
-        $user->delete();
-
-       
+            $user->delete();
         });
+
         return back()->with('success', 'User berhasil dihapus');
-}
+    }
 }
