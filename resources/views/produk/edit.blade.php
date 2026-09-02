@@ -1,13 +1,17 @@
 @extends('layouts.app')
 
-@section('title', 'Edit User')
+@section('title', 'Edit Produk')
 
 @section('content')
-<h4>Edit User</h4>
+@include('layouts.navbar')
 
-<!-- Gunakan method="POST" dan HAPUS baris @method('PUT') -->
-<form action="{{ route('admin.users.update', $user) }}" method="POST" enctype="multipart/form-data"> 
-    @csrf
-    @include('users._form')
-</form>
+<div class="container py-4">
+    <form action="{{ route('produk.update', $produk->id) }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        @method('PUT')
+
+        {{-- Panggil form produk (bukan form user) --}}
+        @include('produk._form')
+    </form>
+</div>
 @endsection
