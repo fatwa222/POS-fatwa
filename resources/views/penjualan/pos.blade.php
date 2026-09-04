@@ -155,7 +155,7 @@
     @endif
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="page-title m-0">Halaman Kasir (POS)</h1>
+        <h1 class="page-title m-0">Halaman Kasir </h1>
         <span class="badge bg-white text-dark border px-3 py-2 rounded-pill shadow-sm">
             ID Transaksi: <strong>#{{ $sale->id }}</strong>
         </span>
@@ -165,7 +165,7 @@
         <!-- Katalog Produk (Kiri) -->
         <div class="col-lg-7">
             <div class="pos-card p-3">
-                <form method="GET" action="{{ route('penjualan.create') }}" class="mb-3">
+                <form method="GET" action="{{ route('penjualan.edit', $sale->id) }}" class="mb-3">
                     <div class="input-group">
                         <input type="text"
                             name="search"

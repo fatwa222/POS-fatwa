@@ -211,7 +211,7 @@
                 <thead>
                     <tr>
                         <th style="width: 60px;">No</th>
-                        <th style="width: 70px;">Profil</th>
+                        <th style="width: 70px;">Foto</th>
                         <th>Nama</th>
                         <th>Email</th>
                         <th>Role</th>

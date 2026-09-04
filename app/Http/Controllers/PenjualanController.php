@@ -38,26 +38,19 @@ public function index(SearchRequest $request)
     /**
      * Show the form for creating a new resource.
      */
-
     public function create(SearchRequest $request)
-{
-    $user = Auth::user();
+    {
+        $user = Auth::user();
 
-    $sale = Penjualan::firstOrCreate(
-        ['user_id' => $user->id, 'status' => 'OPEN'],
-        ['total_pembayaran' => 0, 'metode_pembayaran' => '-']
-    );
+        $sale = Penjualan::create([
+            'user_id' => $user->id,
+            'status' => 'OPEN',
+            'total_pembayaran' => 0,
+            'metode_pembayaran' => '-',
+        ]);
 
-    $search = $request->search;
-
-    $products = Produk::when($search, function ($query, $search) {
-            $query->where('nama', 'like', "%{$search}%");
-        })
-        ->latest()
-        ->get();
-
-    return view('penjualan.pos', compact('sale', 'products'));
-}
+        return redirect()->route('penjualan.edit', $sale->id);
+    }
     
     /**
      * Store a newly created resource in storage.
@@ -80,19 +73,26 @@ public function index(SearchRequest $request)
     /**
      * Show the form for editing the specified resource.
      */
-  public function edit(Penjualan $penjualan)
-{
-    $sale = $penjualan;
+    public function edit(Request $request, Penjualan $penjualan)
+    {
+        $sale = $penjualan;
 
-    abort_if($sale->status === 'COMPLETED', 403);
+        abort_if($sale->status === 'COMPLETED', 403);
 
-    $sale->load('itemPenjualan');
-    $products = Produk::orderBy('nama')->get();
-    $mode = 'edit';
+        $sale->load('itemPenjualan');
 
-    return view('penjualan.pos', compact('sale', 'products', 'mode'));
-}
+        $search = $request->search;
 
+        $products = Produk::when($search, function ($query, $search) {
+            $query->where('nama', 'like', "%{$search}%");
+        })
+            ->orderBy('nama')
+            ->get();
+
+        $mode = 'edit';
+
+        return view('penjualan.pos', compact('sale', 'products', 'mode'));
+    }
     /**
      * Remove the specified resource from storage.
      */

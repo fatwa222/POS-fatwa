@@ -254,9 +254,9 @@
         <thead>
           <tr>
             <th style="width: 50px;">No</th>
-            <th style="width: 70px;">Foto</th>
+            <th style="width: 70px;">Foto Produk</th>
             <th>Nama Produk</th>
-            <th>Petugas</th>
+            <th>Penginput Barang</th>
             <th class="text-end">Harga Beli</th>
             <th class="text-end">Harga Jual</th>
             <th class="text-center">Stok</th>

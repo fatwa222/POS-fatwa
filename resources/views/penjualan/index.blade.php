@@ -202,11 +202,6 @@
         {{ session('errors') }}
     </div>
     @endif
-    @if(session('success'))
-    <div class="alert alert-success border-0 shadow-sm rounded-3 mb-4">
-        {{ session('success') }}
-    </div>
-    @endif
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="page-title">Daftar Transaksi Penjualan</h1>
@@ -240,7 +235,7 @@
                     <tr>
                         <th style="width: 50px;">No</th>
                         <th>Tanggal Transaksi</th>
-                        <th style="width: 60px;">Kasir</th>
+                        <th style="width: 60px;">Foto Kasir</th>
                         <th>Nama Kasir</th>
                         <th class="text-end">Total Pembayaran</th>
                         <th class="text-center">Metode</th>
