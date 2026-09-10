@@ -141,7 +141,9 @@
 
 <div class="container py-4">
     <div class="dashboard-header text-center">
-        <h1 class="dashboard-title">Ringkasan Penjualan</h1>
+        <h1 class="dashboard-title">Ringkasan Penjualan Yuuma GameShop
+    
+        </h1>
         <div class="dashboard-subtitle">
             {{ $tanggalHariIni->translatedFormat('l, d F Y') }}
         </div>

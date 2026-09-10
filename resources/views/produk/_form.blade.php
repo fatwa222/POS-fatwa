@@ -137,7 +137,7 @@
     <!-- Nama Produk -->
     <div class="mb-3">
         <label class="form-label custom-form-label">Nama Produk</label>
-        <input type="text" name="name" class="form-control form-control-custom @error('name') is-invalid @enderror" value="{{ old('name', $produk->nama ?? '') }}" placeholder="Contoh: Kopi Susu Aren">
+        <input type="text" name="name" class="form-control form-control-custom @error('name') is-invalid @enderror" value="{{ old('name', $produk->nama ?? '') }}" placeholder="Contoh: Diamond">
         @error('name')
         <div class="invalid-feedback">{{ $message }}</div>
         @enderror

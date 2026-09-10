@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
-@section('title', 'Login - POS System')
+@section('title', 'Login - Yuuma GameShop')
 
 @section('favicon')
-    <link rel="icon" type="image/png" href="{{ asset('mebius.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('Console.png') }}">
 @endsection
 
 @section('content')
@@ -132,11 +132,11 @@
         <div class="col-lg-6 brand-section d-none d-lg-flex">
             <div>
                 <div class="brand-logo-wrapper">
-                    <img src="{{ asset('mebius.png') }}" alt="Logo" class="brand-logo">
+                    <img src="{{ asset('console.png') }}" alt="Logo" class="brand-logo">
                 </div>
                 
-                <h2 class="fw-bold text-white mb-2">Point of Sale</h2>
-                <p class="text-white-50 fs-6 mb-4">Sistem Manajemen Penjualan & Kasir Terintegrasi.</p>
+                <h2 class="fw-bold text-white mb-2">Yuuma GameShop</h2>
+                
                 
                 <hr style="border-color: rgba(255,255,255,0.15);">
 
@@ -148,7 +148,7 @@
             </div>
             
             <div class="mt-auto pt-4 border-top border-white-10">
-                <small class="text-white-50">&copy; {{ date('Y') }} POS System. All rights reserved.</small>
+                <small class="text-white-50">&copy; {{ date('Y') }} Yuuma GameShop. All rights reserved.</small>
             </div>
         </div>
 
@@ -157,7 +157,7 @@
             <!-- Logo Mobile (Hanya muncul di layar kecil) -->
             <div class="text-center d-lg-none mb-4">
                 <img src="{{ asset('mebius.png') }}" alt="Logo" width="50" class="mb-2">
-                <h4 class="fw-bold text-dark mb-0">POS System</h4>
+                <h4 class="fw-bold text-dark mb-0">Yuuma GameShop</h4>
             </div>
 
             <div class="mb-4">
