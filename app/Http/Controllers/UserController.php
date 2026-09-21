@@ -8,8 +8,9 @@ use App\Http\Requests\User\UpdateRequest;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage; // Added Storage Facade
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -20,7 +21,7 @@ class UserController extends Controller
     {
         $keyword = $request->input('search');
 
-        if($keyword) {
+        if ($keyword) {
             $users = User::whereRaw("MATCH(name, email) AGAINST(? IN BOOLEAN MODE)", [$keyword])
                 ->paginate(10)
                 ->withQueryString();
@@ -48,10 +49,12 @@ class UserController extends Controller
     {
         $dataReq = $request->validated();
 
-        $data['name']     = $dataReq['name'];
-        $data['email']    = $dataReq['email'];
-        $data['password'] = Hash::make($dataReq['password']);
-        $data['role_id']  = $dataReq['role_id'];
+        $data = [
+            'name'     => $dataReq['name'],
+            'email'    => $dataReq['email'],
+            'password' => Hash::make($dataReq['password']),
+            'role_id'  => $dataReq['role_id'],
+        ];
 
         // Cek jika ada foto yang di-upload
         if ($request->hasFile('avatar')) {
@@ -61,14 +64,6 @@ class UserController extends Controller
         User::create($data);
 
         return redirect()->route('admin.users')->with('success', 'User berhasil dibuat');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
     }
 
     /**
@@ -116,22 +111,30 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        \DB::transaction(function () use ($user) {
+        DB::transaction(function () use ($user) {
             // Ambil ID produk & penjualan user
-            $produkIds = \DB::table('produk')->where('user_id', $user->id)->pluck('id');
-            $penjualanIds = \DB::table('penjualan')->where('user_id', $user->id)->pluck('id');
+            $produkIds = DB::table('produk')->where('user_id', $user->id)->pluck('id');
+            $penjualanIds = DB::table('penjualan')->where('user_id', $user->id)->pluck('id');
 
-            // 1. Hapus item_penjualan terkait
-            \DB::table('item_penjualan')
-                ->whereIn('produk_id', $produkIds)
-                ->orWhereIn('penjualan_id', $penjualanIds)
-                ->delete();
+            // 1. Hapus item_penjualan terkait (dikelompokkan agar aman)
+            if ($produkIds->isNotEmpty() || $penjualanIds->isNotEmpty()) {
+                DB::table('item_penjualan')
+                    ->where(function ($query) use ($produkIds, $penjualanIds) {
+                        if ($produkIds->isNotEmpty()) {
+                            $query->whereIn('produk_id', $produkIds);
+                        }
+                        if ($penjualanIds->isNotEmpty()) {
+                            $query->orWhereIn('penjualan_id', $penjualanIds);
+                        }
+                    })
+                    ->delete();
+            }
 
             // 2. Hapus penjualan
-            \DB::table('penjualan')->where('user_id', $user->id)->delete();
+            DB::table('penjualan')->where('user_id', $user->id)->delete();
 
             // 3. Hapus produk
-            \DB::table('produk')->where('user_id', $user->id)->delete();
+            DB::table('produk')->where('user_id', $user->id)->delete();
 
             // 4. Hapus file foto dari storage jika ada
             if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {

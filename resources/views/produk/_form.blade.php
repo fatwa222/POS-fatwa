@@ -9,7 +9,6 @@
         --border-color: #E2E8F0;
     }
 
-    /* Form Card Container */
     .form-container-card {
         background: #ffffff;
         border: 1px solid var(--border-color);
@@ -20,7 +19,6 @@
         margin: 0 auto;
     }
 
-    /* Form Label Styling */
     .custom-form-label {
         font-weight: 600;
         font-size: 0.875rem;
@@ -28,7 +26,6 @@
         margin-bottom: 0.5rem;
     }
 
-    /* Inputs Focus & Styling */
     .form-control-custom {
         border-radius: 8px;
         border: 1px solid var(--border-color);
@@ -43,7 +40,6 @@
         box-shadow: 0 0 0 3px rgba(118, 146, 255, 0.15);
     }
 
-    /* Image Preview Container */
     .image-preview-box {
         border: 2px dashed var(--border-color);
         border-radius: 10px;
@@ -64,7 +60,6 @@
         object-fit: cover;
     }
 
-    /* Action Buttons */
     .btn-save-custom {
         background-color: var(--secondary);
         color: #ffffff;
@@ -104,7 +99,6 @@
         <h4 class="fw-bold mb-1" style="color: var(--primary);">
             {{ isset($produk) ? 'Edit Data Produk' : 'Tambah Produk Baru' }}
         </h4>
-
     </div>
 
     <!-- Section Foto Produk -->
@@ -137,10 +131,31 @@
     <!-- Nama Produk -->
     <div class="mb-3">
         <label class="form-label custom-form-label">Nama Produk</label>
-        <input type="text" name="name" class="form-control form-control-custom @error('name') is-invalid @enderror" value="{{ old('name', $produk->nama ?? '') }}" placeholder="Contoh: Diamond">
+        <input type="text" name="name" class="form-control form-control-custom @error('name') is-invalid @enderror" value="{{ old('name', $produk->nama ?? '') }}" placeholder="Contoh: Kopi Susu Aren">
         @error('name')
         <div class="invalid-feedback">{{ $message }}</div>
         @enderror
+    </div>
+
+    <!-- Jenis Produk -->
+    <div class="mb-3">
+        <label class="form-label custom-form-label">Jenis Produk</label>
+        <select name="jenis_id" class="form-select form-control-custom @error('jenis_id') is-invalid @enderror">
+            <option value="">-- Pilih Jenis --</option>
+            @foreach($jenis as $j)
+            <option value="{{ $j->id }}" @selected(old('jenis_id', $produk->jenis_id ?? '') == $j->id)>
+                {{ $j->nama }}
+            </option>
+            @endforeach
+        </select>
+        @error('jenis_id')
+        <div class="invalid-feedback d-block">{{ $message }}</div>
+        @enderror
+        @if($jenis->isEmpty())
+        <div class="form-text text-muted small mt-1">
+            Belum ada jenis produk. <a href="{{ route('jenis.create') }}">Tambah jenis dulu di sini</a>.
+        </div>
+        @endif
     </div>
 
     <!-- Baris Harga (Beli & Jual) -->

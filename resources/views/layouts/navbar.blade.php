@@ -93,11 +93,15 @@
           <a class="nav-link custom-nav-link {{ Request::is('admin/users*') ? 'active' : '' }}" href="{{ route('admin.users') }}">Users</a>
         </li>
         <li class="nav-item">
+          <a class="nav-link custom-nav-link {{ Request::is('jenis*') ? 'active' : '' }}" href="{{ route('jenis.index') }}">Jenis</a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link custom-nav-link {{ Request::is('produk*') ? 'active' : '' }}" href="{{ route('produk.index') }}">Produk</a>
         </li>
         <li class="nav-item">
           <a class="nav-link custom-nav-link {{ Request::is('penjualan*') ? 'active' : '' }}" href="{{ route('penjualan.index') }}">Penjualan</a>
         </li>
+        
       </ul>
 
       <!-- Ikon Profil di Ujung Kanan -->

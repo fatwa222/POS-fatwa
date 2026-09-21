@@ -5,36 +5,38 @@ namespace App\Http\Controllers;
 use App\Http\Requests\SearchRequest;
 use App\Http\Requests\Produk\UpdateRequest;
 use App\Models\Produk;
+use App\Models\Jenis;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Produk\StoreRequest;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class ProdukController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+    use AuthorizesRequests;
     public function index(SearchRequest $request)
     {
         $this->authorize('viewAny', Produk::class);
 
-       $keyword = $request->input('search');
+        $keyword = $request->input('search');
 
-if($keyword) {
-    $products = Produk::when($keyword, function ($query) use ($keyword) {
-        $query->where('nama', 'like', '%' . $keyword . '%');
-    })
-    ->orderBy('nama')
-    ->paginate(10)
-    ->withQueryString();
-} else {
-    $products = Produk::latest()->paginate(10)->withQueryString();
-}
- return view('produk.index', compact('products'));
+        if ($keyword) {
+            $products = Produk::with('jenis')->when($keyword, function ($query) use ($keyword) {
+                $query->where('nama', 'like', '%' . $keyword . '%');
+            })
+            ->orderBy('nama')
+            ->paginate(10)
+            ->withQueryString();
+        } else {
+            $products = Produk::with('jenis')->latest()->paginate(10)->withQueryString();
+        }
+
+        return view('produk.index', compact('products'));
     }
-   
-    
 
     /**
      * Show the form for creating a new resource.
@@ -43,7 +45,9 @@ if($keyword) {
     {
         $this->authorize('create', Produk::class);
 
-        return view('produk.create');
+        $jenis = Jenis::orderBy('nama')->get();
+
+        return view('produk.create', compact('jenis'));
     }
 
     /**
@@ -55,19 +59,20 @@ if($keyword) {
 
         $dataReq = $request->validated();
 
-$data['user_id'] = Auth::id();
-$data['nama'] = $dataReq['name'];
-$data['harga_beli'] = $dataReq['purchase_price'];
-$data['harga_jual'] = $dataReq['selling_price'];
-$data['stok'] = $dataReq['stock'] ?? true;
+        $data['user_id'] = Auth::id();
+        $data['jenis_id'] = $dataReq['jenis_id'];
+        $data['nama'] = $dataReq['name'];
+        $data['harga_beli'] = $dataReq['purchase_price'];
+        $data['harga_jual'] = $dataReq['selling_price'];
+        $data['stok'] = $dataReq['stock'] ?? true;
 
-if ($request->hasFile('foto')) {
-    $data['foto'] = $request->file('foto')->store('products', 'public');
-}
+        if ($request->hasFile('foto')) {
+            $data['foto'] = $request->file('foto')->store('products', 'public');
+        }
 
-Produk::create($data);
+        Produk::create($data);
 
-return redirect()->route('produk.index')->with('success', 'Product created successfully.');
+        return redirect()->route('produk.index')->with('success', 'Product created successfully.');
     }
 
     /**
@@ -86,11 +91,10 @@ return redirect()->route('produk.index')->with('success', 'Product created succe
     {
         $this->authorize('update', $produk);
 
-        return view('produk.edit', compact('produk'));
+        $jenis = Jenis::orderBy('nama')->get();
+
+        return view('produk.edit', compact('produk', 'jenis'));
     }
-    
-        //
-    
 
     /**
      * Update the specified resource in storage.
@@ -98,10 +102,12 @@ return redirect()->route('produk.index')->with('success', 'Product created succe
     public function update(UpdateRequest $request, Produk $produk)
     {
         $this->authorize('update', $produk);
-    $dataReq = $request->validated();
+
+        $dataReq = $request->validated();
 
         $data = [
             'user_id'    => Auth::id(),
+            'jenis_id'   => $dataReq['jenis_id'],
             'nama'       => $dataReq['name'],
             'harga_beli' => $dataReq['purchase_price'],
             'harga_jual' => $dataReq['selling_price'],
@@ -135,9 +141,11 @@ return redirect()->route('produk.index')->with('success', 'Product created succe
         $this->authorize('delete', $produk);
 
         if ($produk->foto) {
-        Storage::disk('public')->delete($produk->foto);
-    }
-    $produk->delete();
-    return redirect()->route('produk.index')->with('success', 'Product deleted successfully.');
+            Storage::disk('public')->delete($produk->foto);
+        }
+
+        $produk->delete();
+
+        return redirect()->route('produk.index')->with('success', 'Product deleted successfully.');
     }
 }

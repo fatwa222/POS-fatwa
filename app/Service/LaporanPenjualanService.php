@@ -27,22 +27,22 @@ class LaporanPenjualanService
         ];
     }
 
-    public function produkTerlarisHariIni(int $limit = 5)
-    {
-        return DB::table('item_penjualan')
-            ->join('penjualan', 'penjualan.id', '=', 'item_penjualan.penjualan_id')
-            ->join('produk', 'produk.id', '=', 'item_penjualan.produk_id')
-            ->whereDate('penjualan.created_at', Carbon::today())
-            ->where('penjualan.status', 'COMPLETED')
-            ->groupBy('produk.id', 'produk.nama')
-            ->select(
-                'produk.nama',
-                'produk.stok',
-                DB::raw('SUM(item_penjualan.kuantitas) as total_terjual')
-            )
-            ->orderByDesc('total_terjual')
-            ->limit($limit)
-            ->get();
-    }
+    public function produkTerlarisHariIni($limit = 5)
+{
+    return DB::table('item_penjualan')
+        ->join('penjualan', 'penjualan.id', '=', 'item_penjualan.penjualan_id')
+        ->join('produk', 'produk.id', '=', 'item_penjualan.produk_id')
+        ->whereDate('penjualan.created_at', now()->today())
+        ->where('penjualan.status', 'COMPLETED')
+        ->select(
+            'produk.nama',
+            'produk.stok',
+            DB::raw('SUM(item_penjualan.kuantitas) as total_terjual')
+        )
+        ->groupBy('produk.id', 'produk.nama', 'produk.stok') // <--- Tambahkan produk.stok di sini
+        ->orderByDesc('total_terjual')
+        ->limit($limit)
+        ->get();
+}
 
 }

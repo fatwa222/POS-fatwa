@@ -8,6 +8,7 @@ use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\ItemPenjualanController;
+use App\Http\Controllers\JenisController;
 
 
 //route yang bisa diakses ketika user belum login
@@ -31,12 +32,11 @@ Route::middleware('auth')->group(function () {
         });
         Route::middleware('role:admin,kasir')->group(function () {
         Route::resource('/produk', ProdukController::class);
+        Route::resource('/jenis', JenisController::class)->parameters(['jenis' => 'jenis']);
         Route::resource('/penjualan', PenjualanController::class);
         Route::resource('/item-penjualan', ItemPenjualanController::class);
+       
         Route::get('/profil', [ProfilController::class, 'index'])->name('profil.index');
-});     
+        Route::get('/penjualan/{id}/struk', [PenjualanController::class, 'cetakStruk'])->name('penjualan.struk');
+        });     
     });
-
-
-
-

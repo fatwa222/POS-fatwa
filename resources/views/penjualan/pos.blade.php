@@ -126,23 +126,10 @@
         background-color: #15803D;
         color: #ffffff;
     }
-
-    .btn-cancel {
-        background-color: transparent;
-        color: #DC2626;
-        border: 1px solid #FCA5A5;
-        font-weight: 500;
-        padding: 0.5rem;
-        border-radius: 8px;
-    }
-
-    .btn-cancel:hover {
-        background-color: #FEE2E2;
-        color: #991B1B;
-    }
 </style>
 
 <div class="container py-4">
+    {{-- Alert Pesan Flash --}}
     @if(session('errors'))
     <div class="alert alert-danger border-0 shadow-sm rounded-3 mb-4">
         {{ session('errors') }}
@@ -155,7 +142,7 @@
     @endif
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="page-title m-0">Halaman Kasir </h1>
+        <h1 class="page-title m-0">Halaman Kasir</h1>
         <span class="badge bg-white text-dark border px-3 py-2 rounded-pill shadow-sm">
             ID Transaksi: <strong>#{{ $sale->id }}</strong>
         </span>
@@ -209,7 +196,7 @@
             </div>
         </div>
 
-        <!-- Rincian Keranjang (Kanan) -->
+        <!-- Rincian Keranjang & Pembayaran (Kanan) -->
         <div class="col-lg-5">
             <div class="pos-card p-3">
                 <h5 class="fw-bold mb-3" style="color: var(--primary);">Keranjang Belanja</h5>
@@ -273,84 +260,135 @@
                     </table>
                 </div>
 
-                <div class="total-box d-flex justify-content-between align-items-center">
+                <div class="total-box d-flex justify-content-between align-items-center mb-3">
                     <span class="fw-semibold text-muted">Total Bayar:</span>
                     <span class="fs-4 fw-bold" style="color: var(--secondary);">
                         Rp {{ number_format($sale->total_pembayaran, 0, ',', '.') }}
                     </span>
                 </div>
 
-                <form method="POST" action="{{ route('penjualan.update', $sale->id) }}" class="mt-3">
-                    @csrf
-                    @method('PUT')
+                <!-- Form Selesaikan Pembayaran -->
+                <!-- Form Selesaikan Pembayaran -->
+<form action="{{ route('penjualan.update', $sale->id) }}" method="POST" id="form-checkout">
+    @csrf
+    @method('PUT')
 
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold text-muted">Metode Pembayaran</label>
-                        <select name="metode_pembayaran" id="metodePembayaran" class="form-select" required onchange="toggleCashInput()">
-                            <option value="">-- Pilih Metode --</option>
-                            <option value="CASH">Cash (Tunai)</option>
-                            <option value="QRIS">QRIS</option>
-                            <option value="TRANSFER">Transfer Bank</option>
-                        </select>
-                    </div>
+    <input type="hidden" id="total_pembayaran" value="{{ $sale->total_pembayaran }}">
 
-                    <div id="cashCalculation" class="d-none mb-3">
-                        <div class="mb-2">
-                            <label class="form-label small fw-semibold text-muted">Uang Diterima (Rp)</label>
-                            <input type="number" id="uangDiterima" class="form-control" placeholder="0" oninput="calculateKembalian()">
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded border">
-                            <span class="small fw-semibold text-muted">Kembalian:</span>
-                            <span id="uangKembalian" class="fw-bold text-success">Rp 0</span>
-                        </div>
-                    </div>
+    <div class="mb-3">
+        <label class="form-label text-muted small">Metode Pembayaran</label>
+        <select name="metode_pembayaran" id="metode_pembayaran" class="form-select">
+            <option value="Cash (Tunai)">Cash (Tunai)</option>
+            <option value="QRIS">QRIS</option>
+            <option value="Transfer">Transfer</option>
+        </select>
+    </div>
 
-                    <button type="submit" class="btn btn-checkout w-100" {{ $sale->itemPenjualan->isEmpty() ? 'disabled' : '' }}>
-                        Selesaikan Transaksi
-                    </button>
-                </form>
+    <!-- Container CASH -->
+    <div id="container-cash">
+        <div class="mb-3">
+            <label class="form-label text-muted small">Uang Diterima (Rp)</label>
+            <input type="number"
+                name="uang_diterima"
+                id="uang_diterima"
+                class="form-control form-control-lg"
+                placeholder="0"
+                min="0">
+        </div>
 
-                @can('delete', $sale)
-                <form method="POST" action="{{ route('penjualan.destroy', $sale->id) }}"
-                    onsubmit="return confirm('Yakin batalkan transaksi ini? Seluruh isi keranjang akan dihapus.')"
-                    class="mt-2">
+        <div class="p-3 bg-light rounded border mb-3 d-flex justify-content-between align-items-center">
+            <span class="text-muted fw-semibold">Kembalian:</span>
+            <span class="h5 mb-0 fw-bold text-success" id="text-kembalian">Rp 0</span>
+        </div>
+    </div>
+
+    <!-- Container QRIS -->
+    <div id="container-qris" class="text-center p-3 bg-light rounded border mb-3" style="display: none;">
+        <p class="small text-muted mb-2 fw-semibold">Scan QRIS untuk Pembayaran</p>
+        <!-- Ganti 'qris.png' dengan path gambar QRIS kamu -->
+       <img src="{{ asset('assets/img/qrisfatwa.jpeg') }}" alt="QRIS Code" class="img-fluid rounded border bg-white p-2" style="max-height: 180px;">
+    </div>
+
+    <!-- Container TRANSFER -->
+    <div id="container-transfer" class="p-3 bg-light rounded border mb-3" style="display: none;">
+        <p class="small text-muted mb-1 fw-semibold">Rekening Pembayaran:</p>
+        <div class="fw-bold text-dark">BCA: 1234-5678-90</div>
+        <div class="small text-muted">a.n. Nama Toko Kamu</div>
+    </div>
+
+    <button type="submit" class="btn btn-success w-100 py-2 mb-2 btn-checkout" id="btn-submit-checkout" {{ $sale->itemPenjualan->isEmpty() ? 'disabled' : '' }}>
+        Selesaikan Transaksi
+    </button>
+</form>
+                <!-- Form Batal Transaksi -->
+                <form action="{{ route('penjualan.destroy', $sale->id) }}" method="POST" onsubmit="return confirm('Yakin ingin membatalkan transaksi ini?')">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="btn btn-cancel w-100">
+                    <button type="submit" class="btn btn-outline-danger w-100 py-2">
                         Batal Transaksi
                     </button>
                 </form>
-                @endcan
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    function toggleCashInput() {
-        const metode = document.getElementById('metodePembayaran').value;
-        const cashBox = document.getElementById('cashCalculation');
-        if (metode === 'CASH') {
-            cashBox.classList.remove('d-none');
-        } else {
-            cashBox.classList.add('d-none');
-        }
+document.addEventListener('DOMContentLoaded', function() {
+    const totalPembayaran = parseFloat(document.getElementById('total_pembayaran').value) || 0;
+    const inputUangDiterima = document.getElementById('uang_diterima');
+    const textKembalian = document.getElementById('text-kembalian');
+    const selectMetode = document.getElementById('metode_pembayaran');
+
+    const containerCash = document.getElementById('container-cash');
+    const containerQris = document.getElementById('container-qris');
+    const containerTransfer = document.getElementById('container-transfer');
+
+    function formatRupiah(number) {
+        return 'Rp ' + new Intl.NumberFormat('id-ID').format(number);
     }
 
-    function calculateKembalian() {
-        // Mengambil angka total langsung dari PHP secara aman
-        const totalPembayaran = Number("{{ $sale->total_pembayaran ?? 0 }}") || 0;
-        const inputUang = parseFloat(document.getElementById('uangDiterima').value) || 0;
-        const kembalian = inputUang - totalPembayaran;
-        const elKembalian = document.getElementById('uangKembalian');
+    function calculateChange() {
+        const uangDiterima = parseFloat(inputUangDiterima.value) || 0;
+        const kembalian = uangDiterima - totalPembayaran;
 
         if (kembalian >= 0) {
-            elKembalian.className = 'fw-bold text-success';
-            elKembalian.innerText = 'Rp ' + kembalian.toLocaleString('id-ID');
+            textKembalian.innerText = formatRupiah(kembalian);
+            textKembalian.className = 'h5 mb-0 fw-bold text-success';
         } else {
-            elKembalian.className = 'fw-bold text-danger';
-            elKembalian.innerText = 'Kurang Rp ' + Math.abs(kembalian).toLocaleString('id-ID');
+            textKembalian.innerText = formatRupiah(kembalian);
+            textKembalian.className = 'h5 mb-0 fw-bold text-danger';
         }
     }
+
+    function togglePaymentMethod() {
+        const value = selectMetode.value.toUpperCase();
+
+        // Sembunyikan semua container dulu
+        containerCash.style.display = 'none';
+        containerQris.style.display = 'none';
+        containerTransfer.style.display = 'none';
+        inputUangDiterima.removeAttribute('required');
+
+        if (value.includes('CASH') || value.includes('TUNAI')) {
+            containerCash.style.display = 'block';
+            inputUangDiterima.value = '';
+            inputUangDiterima.setAttribute('required', 'required');
+            calculateChange();
+        } else if (value.includes('QRIS')) {
+            containerQris.style.display = 'block';
+            inputUangDiterima.value = totalPembayaran; // Auto-fill agar backend tidak null
+        } else if (value.includes('TRANSFER')) {
+            containerTransfer.style.display = 'block';
+            inputUangDiterima.value = totalPembayaran; // Auto-fill agar backend tidak null
+        }
+    }
+
+    inputUangDiterima.addEventListener('input', calculateChange);
+    selectMetode.addEventListener('change', togglePaymentMethod);
+
+    // Jalankan sekali saat pertama load
+    togglePaymentMethod();
+});
 </script>
 @endsection

@@ -256,6 +256,7 @@
             <th style="width: 50px;">No</th>
             <th style="width: 70px;">Foto Produk</th>
             <th>Nama Produk</th>
+            <th>Jenis Produk</th>
             <th>Penginput Barang</th>
             <th class="text-end">Harga Beli</th>
             <th class="text-end">Harga Jual</th>
@@ -275,17 +276,18 @@
               @endif
             </td>
             <td class="fw-semibold" style="color: var(--primary);">{{ $product->nama }}</td>
+            <td>{{ $product->jenis?->nama ?? $product->jenis?->nama_jenis ?? '-' }}</td>
             <td class="text-muted small">{{ $product->user?->name ?? 'Sistem' }}</td>
             <td class="text-end text-muted">Rp {{ number_format($product->harga_beli) }}</td>
             <td class="text-end fw-bold" style="color: var(--secondary);">Rp {{ number_format($product->harga_jual) }}</td>
             <td class="text-center">
               @if($product->stok <= 0)
                 <span class="badge-stock-empty">Habis</span>
-                @elseif($product->stok <= 5)
-                  <span class="badge-stock-low">{{ $product->stok }}</span>
-                  @else
-                  <span class="badge-stock-safe">{{ $product->stok }}</span>
-                  @endif
+              @elseif($product->stok <= 5)
+                <span class="badge-stock-low">{{ $product->stok }}</span>
+              @else
+                <span class="badge-stock-safe">{{ $product->stok }}</span>
+              @endif
             </td>
             <td class="text-end">
               <div class="d-inline-flex gap-1">
@@ -313,7 +315,7 @@
           </tr>
           @empty
           <tr>
-            <td colspan="8" class="text-center py-5 text-muted">
+            <td colspan="9" class="text-center py-5 text-muted">
               Data produk tidak ditemukan.
             </td>
           </tr>
@@ -324,7 +326,7 @@
 
     <!-- Pagination -->
     @if($products->hasPages())
-    <div class="d-flex justify-content-end mt-4">
+    <div class="d-flex justify-end mt-4">
       {{ $products->withQueryString()->links() }}
     </div>
     @endif
