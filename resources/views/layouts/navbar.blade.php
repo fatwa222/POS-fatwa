@@ -3,7 +3,7 @@
   .custom-navbar {
     background-color: #091540 !important;
     box-shadow: 0 4px 20px rgba(9, 21, 64, 0.25);
-    padding: 0.75rem 0;
+    padding: 0.75rem ;
   }
 
   /* User Profile Left (Brand) */
@@ -65,7 +65,7 @@
 </style>
 
 <nav class="navbar navbar-expand-lg navbar-dark custom-navbar sticky-top">
-  <div class="container">
+  <div class="container-fluid">
 
     <!-- Profil User di Ujung Kiri -->
     <a class="navbar-brand d-flex align-items-center brand-profile text-decoration-none" href="#">

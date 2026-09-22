@@ -8,9 +8,11 @@ use App\Models\Penjualan;
 use App\Http\Requests\SearchRequest;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Produk;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class PenjualanController extends Controller
 {
+    use AuthorizesRequests;
     /**
      * Display a listing of the resource.
      */
@@ -86,9 +88,10 @@ class PenjualanController extends Controller
      */
     public function edit(Request $request, Penjualan $penjualan)
     {
+        $this->authorize('update', $penjualan);
         $sale = $penjualan;
 
-        abort_if($sale->status === 'COMPLETED', 403);
+       
 
         $sale->load('itemPenjualan');
 

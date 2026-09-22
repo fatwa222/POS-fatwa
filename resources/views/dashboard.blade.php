@@ -171,13 +171,13 @@
         <div class="row g-3">
             <div class="col-md-6">
                 <div class="stat-card">
-                    <div class="stat-label">Pembayaran Tunai (Cash)</div>
+                    <div class="stat-label">Pembayaran Non-Tunai</div>
                     <div class="stat-value">Rp {{ number_format($ringkasan['total_cash']) }}</div>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="stat-card">
-                    <div class="stat-label">Pembayaran Non-Tunai</div>
+                    <div class="stat-label">Pembayaran Tunai (Cash)</div>
                     <div class="stat-value">Rp {{ number_format($ringkasan['total_non_tunai']) }}</div>
                 </div>
             </div>

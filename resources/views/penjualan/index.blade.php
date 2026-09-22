@@ -279,7 +279,7 @@
                         </td>
                         <td class="text-end">
                             <div class="d-inline-flex gap-1">
-                              <!-- Tombol Struk (Membuka di tab yang sama & menggunakan tema Bootstrap) -->
+                                <!-- Tombol Struk -->
                                 <a href="{{ route('penjualan.struk', $sale->id) }}" class="btn btn-sm btn-primary" title="Lihat Struk">
                                     <i class="fas fa-receipt"></i> Struk
                                 </a>    
@@ -287,12 +287,11 @@
                                     Detail
                                 </a>
 
-                                @can('view', $sale)
-                                @if(strtoupper($sale->status) === 'OPEN')
-                                <a href="{{ route('penjualan.edit', $sale) }}" class="btn-action-edit">
-                                    Edit
-                                </a>
-                                @endif
+                               
+                                @can('update', $sale)
+                                    <a href="{{ route('penjualan.edit', $sale) }}" class="btn-action-edit">
+                                        Edit
+                                    </a>
                                 @endcan
 
                                 @can('delete', $sale)
@@ -313,6 +312,7 @@
                             Data transaksi penjualan tidak ditemukan.
                         </td>
                     </tr>
+                
                     @endforelse
                 </tbody>
             </table>
@@ -325,7 +325,6 @@
         @endif
     </div>
 </div>
-
 
 <script>
 function checkout() {
@@ -344,10 +343,7 @@ function checkout() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // 1. Otomatis buka struk di tab baru
             window.open('/penjualan/' + data.penjualan_id + '/struk', '_blank');
-
-            // 2. Reload halaman kasir untuk transaksi baru
             window.location.reload();
         } else {
             alert("Gagal menyimpan transaksi");
@@ -355,6 +351,5 @@ function checkout() {
     })
     .catch(error => console.error("Error:", error));
 }
-
 </script>
 @endsection

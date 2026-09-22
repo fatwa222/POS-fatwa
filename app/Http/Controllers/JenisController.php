@@ -40,11 +40,14 @@ class JenisController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(StoreRequest $request)
-    {
-        Jenis::create($request->validated());
+{
+   
+    Jenis::create(array_merge($request->validated(), [
+        'user_id' => auth()->id(),
+    ]));
 
-        return redirect()->route('jenis.index')->with('success', 'Jenis produk berhasil ditambahkan.');
-    }
+    return redirect()->route('jenis.index')->with('success', 'Jenis produk berhasil ditambahkan.');
+}
 
     /**
      * Display the specified resource.

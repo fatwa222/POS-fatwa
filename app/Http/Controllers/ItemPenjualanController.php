@@ -7,9 +7,11 @@ use App\Models\ItemPenjualan;
 use App\Models\Produk;
 use App\Models\Penjualan; 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class ItemPenjualanController extends Controller
 {
+    use AuthorizesRequests;
     /**
      * Display a listing of the resource.
      */

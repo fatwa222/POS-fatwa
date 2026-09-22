@@ -1,3 +1,4 @@
+@include('layouts.navbar')
 <style>
     :root {
         --primary: #091540;

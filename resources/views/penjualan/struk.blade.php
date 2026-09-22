@@ -1,8 +1,4 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Struk Pembelian #{{ $penjualan->id }}</title>
     <style>
         body {
@@ -131,5 +127,3 @@
             window.print();
         }
     </script>
-</body>
-</html>

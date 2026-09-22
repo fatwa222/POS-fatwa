@@ -13,6 +13,7 @@ class Jenis extends Model
 
     protected $fillable = [
         'nama',
+        'user_id',
     ];
 
     public function produk()

@@ -55,11 +55,11 @@
 </style>
 
 <div class="container py-4">
-    @if(session('success'))
+    <!-- @if(session('success'))
     <div class="alert alert-success border-0 shadow-sm rounded-3 mb-4">
         {{ session('success') }}
     </div>
-    @endif
+    @endif -->
     @if(session('error'))
     <div class="alert alert-danger border-0 shadow-sm rounded-3 mb-4">
         {{ session('error') }}

@@ -7,15 +7,25 @@ use App\Models\User;
 
 class PenjualanPolicy
 {
-    public function delete(User $user, Penjualan $penjualan): bool
-    {
-        return $user->role->name === 'admin'
-            && $penjualan->status === 'OPEN';
-    }
-
+    
     public function view(User $user, Penjualan $penjualan): bool
     {
-        return $user->role->name === 'admin'
+        
+        return $user->role->name === 'admin';
+    }
+
+   
+    public function update(User $user, Penjualan $penjualan): bool
+    {
+       
+        return $user->role->name === 'admin';
+    }
+
+   
+    public function delete(User $user, Penjualan $penjualan): bool
+    {
+      
+        return $user->role->name === 'admin' 
             && $penjualan->status === 'OPEN';
     }
 }
